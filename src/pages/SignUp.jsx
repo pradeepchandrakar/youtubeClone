@@ -33,7 +33,7 @@ const SignUp = () => {
           result.user.displayName.split(' ').join('').toLowerCase() +
           Math.floor(Math.random() * 90 + 10);
 
-        axios.post(`/auth/google`, {
+        axios.post(`/api/auth/google`, {
           name: result.user.displayName,
           username: generatedUsername,
           email: result.user.email,
@@ -61,7 +61,7 @@ const SignUp = () => {
     const defaultImg = 'https://uploads.commoninja.com/searchengine/wordpress/adorable-avatars.png';
 
     try {
-      const res = await axios.post(`/auth/signup`, {
+      const res = await axios.post(`/api/auth/signup`, {
         name,
         username,
         email,
@@ -71,7 +71,7 @@ const SignUp = () => {
 
       if (res.status === 201) {
         setMsg(res.data.message);
-        // navigate('/signin'); // uncomment if redirecting after success
+        // navigate('/signin'); // Uncomment to redirect after success
       }
     } catch (err) {
       dispatch(signupFailure(err?.response?.data?.message || 'Signup failed.'));
@@ -83,12 +83,10 @@ const SignUp = () => {
       {error && <ToastNotification type="error" message={error} />}
       {msg && <ToastNotification type="success" message={msg} />}
 
-      {/* Card */}
       <div className="flex flex-col items-center w-full max-w-md gap-5 bg-neutral-800 border border-neutral-600 px-10 py-8 rounded-lg shadow-md">
         <h1 className="text-3xl font-semibold">Sign Up</h1>
         <h2 className="text-xl text-neutral-400 text-center">to continue your YouTube account</h2>
 
-        {/* Inputs */}
         <input
           className="w-full px-4 py-2 border border-neutral-600 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-green-400"
           type="text"
@@ -126,7 +124,6 @@ const SignUp = () => {
           }}
         />
 
-        {/* Submit */}
         <button
           onClick={handleSignup}
           className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-md transition"
@@ -136,7 +133,6 @@ const SignUp = () => {
 
         <h2 className="text-neutral-400">OR</h2>
 
-        {/* Google Sign-In */}
         <button
           onClick={signInWithGoogle}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition"
@@ -150,7 +146,6 @@ const SignUp = () => {
         </Link>
       </div>
 
-      {/* Footer */}
       <div className="flex text-sm text-neutral-500 mt-6">
         English (USA)
         <div className="ml-6 space-x-6">
@@ -164,3 +159,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
+

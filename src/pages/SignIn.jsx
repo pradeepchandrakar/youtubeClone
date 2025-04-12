@@ -9,21 +9,15 @@ import ToastNotification from '../components/ToastNotification';
 
 const SignIn = () => {
   const [UnameOrEmail, setUnameOrEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { error } = useSelector(state => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (error === '') {
-      dispatch(loginFailure(''));
-    }
-
-    function isValidEmail(email) {
-      return /\S+@\S+\.\S+/.test(email);
-    }
+    const isValidEmail = (input) => /\S+@\S+\.\S+/.test(input);
 
     if (isValidEmail(UnameOrEmail)) {
       setEmail(UnameOrEmail);
@@ -32,59 +26,53 @@ const SignIn = () => {
       setUsername(UnameOrEmail);
       setEmail('');
     }
-  }, [error, dispatch, UnameOrEmail]);
+  }, [UnameOrEmail]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     dispatch(loginStart());
-    try {
-      const response = username
-        ? await axios.post(`/auth/signin`, { username, password })
-        : await axios.post(`/auth/signin`, { email, password });
 
-      if (response.status === 200) {
-        dispatch(loginSuccess(response.data));
-        dispatch(loginFailure(null));
-        navigate('/');
-      }
-    } catch (error) {
-      dispatch(loginFailure(error?.response?.data?.message || 'Login failed.'));
+    try {
+      const payload = username ? { username, password } : { email, password };
+      const res = await axios.post(`/auth/signin`, payload);
+      
+      dispatch(loginSuccess(res.data));
+      dispatch(loginFailure(null));
+      navigate('/');
+    } catch (err) {
+      dispatch(loginFailure(err?.response?.data?.message || 'Login failed. Please try again.'));
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = () => {
     dispatch(loginStart());
     signInWithPopup(auth, provider)
-      .then((result) => {
-        const username =
+      .then(async (result) => {
+        const generatedUsername =
           result.user.displayName.split(' ').join('').toLowerCase() +
           Math.floor(Math.random() * 90 + 10);
-        axios
-          .post(`/auth/google`, {
-            name: result.user.displayName,
-            username: username,
-            email: result.user.email,
-            img: result.user.photoURL,
-          })
-          .then((res) => {
-            dispatch(loginSuccess(res.data));
-            navigate('/');
-          });
+
+        const res = await axios.post(`/auth/google`, {
+          name: result.user.displayName,
+          username: generatedUsername,
+          email: result.user.email,
+          img: result.user.photoURL,
+        });
+
+        dispatch(loginSuccess(res.data));
+        navigate('/');
       })
-      .catch((error) => {
-        dispatch(loginFailure(error?.message || 'Google Sign-In failed.'));
+      .catch((err) => {
+        dispatch(loginFailure(err?.message || 'Google Sign-In failed.'));
       });
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-6rem)] text-white mt-10 px-4">
-      {/* Toast Notification */}
       {error && <ToastNotification type="error" message={error} />}
 
-      {/* Login Card */}
       <div className="flex flex-col items-center bg-neutral-800 border border-neutral-600 px-10 py-8 gap-6 rounded-lg shadow-lg w-full max-w-md relative">
-        
-        {/* Back Button */}
+
         <button
           onClick={() => navigate(-1)}
           className="absolute top-4 left-4 text-sm text-neutral-400 hover:text-white transition"
@@ -95,29 +83,22 @@ const SignIn = () => {
         <h1 className="text-3xl font-semibold mt-2">Sign In</h1>
         <h2 className="text-xl text-neutral-400">to continue to YouTube</h2>
 
-        {/* Username or Email Input */}
         <input
           type="text"
           placeholder="Username or Email"
-          onChange={(e) => {
-            setUnameOrEmail(e.target.value);
-            dispatch(loginFailure(''));
-          }}
+          value={UnameOrEmail}
+          onChange={(e) => setUnameOrEmail(e.target.value)}
           className="w-full px-4 py-2 border border-neutral-600 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-green-400"
         />
 
-        {/* Password Input */}
         <input
           type="password"
           placeholder="Password"
-          onChange={(e) => {
-            setPassword(e.target.value);
-            dispatch(loginFailure(''));
-          }}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-2 border border-neutral-600 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-green-400"
         />
 
-        {/* Sign In Button */}
         <button
           onClick={handleLogin}
           className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-md transition"
@@ -127,7 +108,6 @@ const SignIn = () => {
 
         <h2 className="text-neutral-400">OR</h2>
 
-        {/* Google Sign In */}
         <button
           onClick={signInWithGoogle}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-md transition"
@@ -135,14 +115,12 @@ const SignIn = () => {
           Sign In with Google
         </button>
 
-        {/* Create Account */}
         <h2 className="text-neutral-400">OR</h2>
         <Link to="/signup" className="text-blue-400 hover:underline">
           Create an account
         </Link>
       </div>
 
-      {/* Footer Links */}
       <div className="flex text-sm text-neutral-500 mt-4">
         English (USA)
         <div className="ml-6 space-x-6">
@@ -156,4 +134,5 @@ const SignIn = () => {
 };
 
 export default SignIn;
+
 

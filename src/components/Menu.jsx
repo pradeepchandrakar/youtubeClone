@@ -22,7 +22,7 @@ const Menu = ({ darkMode, setDarkMode, setOpenMenu, type }) => {
 
   const logOut = async () => {
     try {
-      const res = await axios.post('/auth/signout');
+      const res = await axios.post('/api/auth/signout');
       if (res.status === 200) {
         localStorage.removeItem('persist:root');
         dispatch(logout());
@@ -36,11 +36,11 @@ const Menu = ({ darkMode, setDarkMode, setOpenMenu, type }) => {
   const handleClick = async (tag) => {
     setActiveElement(tag);
     if (tag === 'All') {
-      const res = await axios.get(`/videos/random`);
+      const res = await axios.get(`/api/videos/random`);
       dispatch(fetchAllSuccess(res.data));
     } else {
       try {
-        const res = await axios.get(`/videos/tags?tags=${tag}`);
+        const res = await axios.get(`/api/videos/tags?tags=${tag}`);
         if (res.data.length > 0) {
           dispatch(fetchAllSuccess(res.data));
         } else {
